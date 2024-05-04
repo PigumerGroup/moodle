@@ -1,5 +1,10 @@
 AWSTemplateFormatVersion: "2010-09-09"
 
+Parameters:
+  BucketName:
+    Description: A bucket name
+    Type: String
+
 Resources:
   Role:
     Type: AWS::IAM::Role
@@ -17,7 +22,8 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
         - arn:aws:iam::aws:policy/AmazonSSMPatchAssociation
-  
+      RoleName: RoleForMoodle
+
   Policy:
     Type: AWS::IAM::Policy
     Properties:
@@ -28,18 +34,21 @@ Resources:
           - Effect: Allow
             Action:
               - s3:ListBucket
-            Resource: '*'
+            Resource:
+              - !Sub 'arn:aws:s3:::${BucketName}'
           - Effect: Allow
             Action:
               - s3:PutObject
               - s3:GetObject
-            Resource: '*'
+            Resource:
+              - !Sub 'arn:aws:s3:::${BucketName}/*'
       Roles:
         - !Ref Role
   
   InstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
+      InstanceProfileName: MoodleInstanceProfile
       Path: /
       Roles:
         - !Ref Role

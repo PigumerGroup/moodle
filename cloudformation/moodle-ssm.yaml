@@ -6,10 +6,25 @@ Parameters:
     Type: String
 
 Resources:
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for VPC endpoints
+      VpcId: 
+        Fn::ImportValue: !Sub ${EnvironmentName}-VPC
+      SecurityGroupIngress:
+        - SourceSecurityGroupId:
+            Fn::ImportValue: !Sub ${EnvironmentName}-EC2SecurityGroup
+          IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+
   SSMVPCEndpoint:
     Type: AWS::EC2::VPCEndpoint
     Properties:
       ServiceName: !Sub com.amazonaws.${AWS::Region}.ssm
+      SecurityGroupIds:
+        - !Ref SecurityGroup
       SubnetIds:
         - Fn::ImportValue: !Sub ${EnvironmentName}-PrivateSubnet1
         - Fn::ImportValue: !Sub ${EnvironmentName}-PrivateSubnet2
@@ -22,6 +37,8 @@ Resources:
     Type: AWS::EC2::VPCEndpoint
     Properties:
       ServiceName: !Sub com.amazonaws.${AWS::Region}.ec2messages
+      SecurityGroupIds:
+        - !Ref SecurityGroup
       SubnetIds:
         - Fn::ImportValue: !Sub ${EnvironmentName}-PrivateSubnet1
         - Fn::ImportValue: !Sub ${EnvironmentName}-PrivateSubnet2
@@ -34,6 +51,8 @@ Resources:
     Type: AWS::EC2::VPCEndpoint
     Properties:
       ServiceName: !Sub com.amazonaws.${AWS::Region}.ssmmessages
+      SecurityGroupIds:
+        - !Ref SecurityGroup
       SubnetIds:
         - Fn::ImportValue: !Sub ${EnvironmentName}-PrivateSubnet1
         - Fn::ImportValue: !Sub ${EnvironmentName}-PrivateSubnet2
@@ -46,6 +65,8 @@ Resources:
     Type: AWS::EC2::VPCEndpoint
     Properties:
       ServiceName: !Sub com.amazonaws.${AWS::Region}.logs
+      SecurityGroupIds:
+        - !Ref SecurityGroup
       SubnetIds:
         - Fn::ImportValue: !Sub ${EnvironmentName}-PrivateSubnet1
         - Fn::ImportValue: !Sub ${EnvironmentName}-PrivateSubnet2

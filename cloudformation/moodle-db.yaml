@@ -1,0 +1,49 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Parameters:
+  EnvironmentName:
+    Description: An environment name that is prefixed to resource names
+    Type: String
+
+Resources:
+  ElastiCacheSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: ElastiCache (Redis) Security Group
+      GroupName: !Sub ${EnvironmentName}-Redis-SecurityGroup
+      VpcId:
+        Fn::ImportValue: !Sub ${EnvironmentName}-VPC
+  
+  MySQLSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: MySQL Security Group
+      GroupName: !Sub ${EnvironmentName}-MySQL-SecurityGroup
+      VpcId:
+        Fn::ImportValue: !Sub ${EnvironmentName}-VPC
+
+  ElastiCacheSecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      IpProtocol: tcp
+      FromPort: 6379
+      ToPort: 6379
+      SourceSecurityGroupId: 
+        Fn::ImportValue: !Sub ${EnvironmentName}-EC2SecurityGroup
+      GroupId:
+        Fn::GetAtt:
+          - ElastiCacheSecurityGroup
+          - GroupId
+
+  MySQLSecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      IpProtocol: tcp
+      FromPort: 6379
+      ToPort: 6379
+      SourceSecurityGroupId: 
+        Fn::ImportValue: !Sub ${EnvironmentName}-EC2SecurityGroup
+      GroupId:
+        Fn::GetAtt:
+          - MySQLSecurityGroup
+          - GroupId

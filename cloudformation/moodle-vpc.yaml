@@ -141,6 +141,56 @@ Resources:
       VpcEndpointType: Gateway
       VpcId: !Ref VPC
 
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: DBSubnet Group
+      DBSubnetGroupName: DBSubnet
+      SubnetIds:
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+
+  LBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Load Balancer Security Group
+      GroupName: !Sub ${EnvironmentName}-LB-SecurityGroup
+      VpcId: !Ref VPC
+  
+  EC2SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: EC2 Security Group
+      GroupName: !Sub ${EnvironmentName}-EC2-SecurityGroup
+      VpcId: !Ref VPC
+  
+  LBSecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      IpProtocol: tcp
+      CidrIp: 0.0.0.0/0
+      FromPort: 443
+      ToPort: 443
+      GroupId:
+        Fn::GetAtt:
+          - LBSecurityGroup
+          - GroupId
+
+  EC2SecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      IpProtocol: tcp
+      FromPort: 80
+      ToPort: 80
+      SourceSecurityGroupId: 
+        Fn::GetAtt:
+          - LBSecurityGroup
+          - GroupId
+      GroupId:
+        Fn::GetAtt:
+          - EC2SecurityGroup
+          - GroupId
+  
 Outputs:
   VPC:
     Description: A reference to the created VPC
@@ -171,3 +221,27 @@ Outputs:
     Value: !Ref PrivateSubnet2
     Export:
       Name: !Sub ${EnvironmentName}-PrivateSubnet2
+  
+  DBSubnetGroup:
+    Description: A reference to the db subnet group.
+    Value: !Ref DBSubnetGroup
+    Export:
+      Name: !Sub ${EnvironmentName}-DBSubnetGroup
+
+  PrivateRouteTable:
+    Description: A reference to the private route table
+    Value: !Ref PrivateRouteTable
+    Export:
+      Name: !Sub ${EnvironmentName}-PrivateRouteTable
+
+  LBSecurityGroup:
+    Description: A reference to the load balancer security group
+    Value: !Ref LBSecurityGroup
+    Export:
+      Name: !Sub ${EnvironmentName}-LBSecurityGroup
+  
+  EC2SecurityGroup:
+    Description: A reference to the ec2 security group
+    Value: !Ref EC2SecurityGroup
+    Export:
+      Name: !Sub ${EnvironmentName}-EC2SecurityGroup
