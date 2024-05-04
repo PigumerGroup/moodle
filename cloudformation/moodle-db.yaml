@@ -14,14 +14,6 @@ Resources:
       VpcId:
         Fn::ImportValue: !Sub ${EnvironmentName}-VPC
   
-  MySQLSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: MySQL Security Group
-      GroupName: !Sub ${EnvironmentName}-MySQL-SecurityGroup
-      VpcId:
-        Fn::ImportValue: !Sub ${EnvironmentName}-VPC
-
   ElastiCacheSecurityGroupIngress:
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
@@ -35,15 +27,3 @@ Resources:
           - ElastiCacheSecurityGroup
           - GroupId
 
-  MySQLSecurityGroupIngress:
-    Type: AWS::EC2::SecurityGroupIngress
-    Properties:
-      IpProtocol: tcp
-      FromPort: 6379
-      ToPort: 6379
-      SourceSecurityGroupId: 
-        Fn::ImportValue: !Sub ${EnvironmentName}-EC2SecurityGroup
-      GroupId:
-        Fn::GetAtt:
-          - MySQLSecurityGroup
-          - GroupId

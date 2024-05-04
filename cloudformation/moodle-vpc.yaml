@@ -57,6 +57,47 @@ Resources:
         - Key: Name
           Value: !Sub ${EnvironmentName} Public Subnet (AZ2)
 
+  NatGateway1EIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+  
+  NatGateway1:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatGateway1EIP.AllocationId
+      SubnetId: !Ref PublicSubnet1
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName} NatGateway 1 (AZ1)
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName} Public Routes
+
+  DefaultPublicRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+      RouteTableId: !Ref PublicRouteTable
+
+  PublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet1
+
+  PublicSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet2
+
   PrivateSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
@@ -85,14 +126,6 @@ Resources:
         - Key: Name
           Value: !Sub ${EnvironmentName} Private Subnet (AZ2)
 
-  PublicRouteTable:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId: !Ref VPC
-      Tags:
-        - Key: Name
-          Value: !Sub ${EnvironmentName} Public Routes
-
   PrivateRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -100,25 +133,6 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName} Private Routes
-
-  DefaultPublicRoute:
-    Type: AWS::EC2::Route
-    Properties:
-      DestinationCidrBlock: 0.0.0.0/0
-      GatewayId: !Ref InternetGateway
-      RouteTableId: !Ref PublicRouteTable
-
-  PublicSubnet1RouteTableAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId: !Ref PublicRouteTable
-      SubnetId: !Ref PublicSubnet1
-
-  PublicSubnet2RouteTableAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId: !Ref PublicRouteTable
-      SubnetId: !Ref PublicSubnet2
 
   PrivateSubnet1RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
@@ -132,6 +146,13 @@ Resources:
       RouteTableId: !Ref PrivateRouteTable
       SubnetId: !Ref PrivateSubnet2
 
+  RouteNatGateway1:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      DestinationCidrBlock: '0.0.0.0/0'
+      NatGatewayId: !Ref NatGateway1
+
   S3VPCEndpoint:
     Type: AWS::EC2::VPCEndpoint
     Properties:
@@ -141,11 +162,20 @@ Resources:
       VpcEndpointType: Gateway
       VpcId: !Ref VPC
 
-  DBSubnetGroup:
+  MySQLSubnetGroup:
     Type: AWS::RDS::DBSubnetGroup
     Properties:
-      DBSubnetGroupDescription: DBSubnet Group
-      DBSubnetGroupName: DBSubnet
+      DBSubnetGroupDescription: MySQL DBSubnet Group
+      DBSubnetGroupName: MySQLSubnet
+      SubnetIds:
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+
+  ElastiCacheSubnetGroup:
+    Type: AWS::ElastiCache::SubnetGroup
+    Properties:
+      CacheSubnetGroupName: ElastiCacheSubnetGroup
+      Description: ElastiCache Subnet Group
       SubnetIds:
         - !Ref PrivateSubnet1
         - !Ref PrivateSubnet2
@@ -190,7 +220,26 @@ Resources:
         Fn::GetAtt:
           - EC2SecurityGroup
           - GroupId
-  
+
+  MySQLSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: MySQL Security Group
+      GroupName: !Sub ${EnvironmentName}-MySQL-SecurityGroup
+      VpcId: !Ref VPC
+
+  MySQLSecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      IpProtocol: tcp
+      FromPort: 3306
+      ToPort: 3306
+      SourceSecurityGroupId: !Ref EC2SecurityGroup
+      GroupId:
+        Fn::GetAtt:
+          - MySQLSecurityGroup
+          - GroupId
+
 Outputs:
   VPC:
     Description: A reference to the created VPC
@@ -222,12 +271,6 @@ Outputs:
     Export:
       Name: !Sub ${EnvironmentName}-PrivateSubnet2
   
-  DBSubnetGroup:
-    Description: A reference to the db subnet group.
-    Value: !Ref DBSubnetGroup
-    Export:
-      Name: !Sub ${EnvironmentName}-DBSubnetGroup
-
   PrivateRouteTable:
     Description: A reference to the private route table
     Value: !Ref PrivateRouteTable
@@ -245,3 +288,9 @@ Outputs:
     Value: !Ref EC2SecurityGroup
     Export:
       Name: !Sub ${EnvironmentName}-EC2SecurityGroup
+
+  MySQLSubnetGroup:
+    Description: A reference to the mysql db subnet group.
+    Value: !Ref MySQLSubnetGroup
+    Export:
+      Name: !Sub ${EnvironmentName}-MySQLSubnetGroup
