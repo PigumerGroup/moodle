@@ -1,0 +1,32 @@
+---
+- hosts: raspberrypi
+  name: setup
+  vars:
+    ansible_become: yes
+    ansible_become_method: sudo
+  tasks:
+    - name: update/upgrade
+      ansible.builtin.apt:
+        upgrade: dist
+        update_cache: yes
+    - name: install database
+      ansible.builtin.apt:
+        pkg:
+          - mariadb-server
+          - mariadb-client
+          - php
+          - php-mysql
+          - php-xml
+          - php-xmlrpc
+          - php-gd
+          - php-intl
+          - php-mbstring
+          - php-curl
+          - php-tokenizer
+          - php-soap
+          - php-zip
+          - git
+    - name: moodle clone
+      ansible.builtin.git:
+        repo: git://git.moodle.org/moodle.git
+        dest: /opt/moodle
