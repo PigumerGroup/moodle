@@ -17,6 +17,15 @@ Parameters:
     Description: A domain name
     Type: String
 
+  ImageId:
+    Description: An image id
+    Type: String
+
+  InstanceType:
+    Description: An instance Type
+    Type: String
+    Default: t4g.small
+
 Resources:
   LoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
@@ -74,3 +83,28 @@ Resources:
       Name: !Ref DomainName
       HostedZoneId: !Ref HostedZoneId
       Type: A
+
+  LaunchConfiguration:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      IamInstanceProfile:
+        Fn::ImportValue: !Sub ${EnvironmentName}-InstanceProfile
+      ImageId: !Ref ImageId
+      InstanceType: !Ref InstanceType
+      SecurityGroups:
+        - Fn::ImportValue: !Sub ${EnvironmentName}-EC2SecurityGroup
+
+  AutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      DesiredCapacity: 1
+      LaunchConfigurationName: !Ref LaunchConfiguration
+      MinSize: 0
+      MaxSize: 2
+      TargetGroupARNs:
+        - Fn::GetAtt:
+          - TargetGroup
+          - TargetGroupArn
+      VPCZoneIdentifier:
+        - Fn::ImportValue: !Sub ${EnvironmentName}-PrivateSubnet1
+        - Fn::ImportValue: !Sub ${EnvironmentName}-PrivateSubnet2

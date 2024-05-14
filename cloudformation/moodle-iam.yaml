@@ -1,6 +1,10 @@
 AWSTemplateFormatVersion: "2010-09-09"
 
 Parameters:
+  EnvironmentName:
+    Description: An environment name that is prefixed to resource names
+    Type: String
+
   BucketName:
     Description: A bucket name
     Type: String
@@ -52,3 +56,14 @@ Resources:
       Path: /
       Roles:
         - !Ref Role
+
+Outputs:
+  InstanceProfile:
+    Description: A reference to the instance profile
+    Value:
+      Fn::GetAtt:
+        - InstanceProfile
+        - Arn
+    Export:
+      Name: !Sub ${EnvironmentName}-InstanceProfile
+  
