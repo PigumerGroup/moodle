@@ -23,36 +23,31 @@ Resources:
             Action:
               - 'sts:AssumeRole'
       Path: /
+      Policies:
+        - PolicyName: PolicyForMoodle
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                Resource:
+                  - !Sub 'arn:aws:s3:::${BucketName}'
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                Resource:
+                  - !Sub 'arn:aws:s3:::${BucketName}/*'
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
         - arn:aws:iam::aws:policy/AmazonSSMPatchAssociation
-      RoleName: RoleForMoodle
+      RoleName: !Sub RoleForMoodle-${EnvironmentName}
 
-  Policy:
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyName: PolicyForMoodle
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Action:
-              - s3:ListBucket
-            Resource:
-              - !Sub 'arn:aws:s3:::${BucketName}'
-          - Effect: Allow
-            Action:
-              - s3:PutObject
-              - s3:GetObject
-            Resource:
-              - !Sub 'arn:aws:s3:::${BucketName}/*'
-      Roles:
-        - !Ref Role
-  
   InstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
-      InstanceProfileName: MoodleInstanceProfile
+      InstanceProfileName: !Sub MoodleInstanceProfile-${EnvironmentName}
       Path: /
       Roles:
         - !Ref Role
