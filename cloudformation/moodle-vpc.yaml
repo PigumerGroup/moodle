@@ -204,7 +204,7 @@ Resources:
       IpProtocol: tcp
       FromPort: 3306
       ToPort: 3306
-      SourceSecurityGroupId: !Ref EC2SecurityGroup
+      SourceSecurityGroupId: !Ref PrivateEC2SecurityGroup
       GroupId:
         Fn::GetAtt:
           - MySQLSecurityGroup

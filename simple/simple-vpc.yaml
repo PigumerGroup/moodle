@@ -229,6 +229,18 @@ Resources:
           - MySQLSecurityGroup
           - GroupId
 
+  MySQLSecurityGroupIngress2:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      IpProtocol: tcp
+      FromPort: 3306
+      ToPort: 3306
+      SourceSecurityGroupId: !Ref PrivateEC2SecurityGroup
+      GroupId:
+        Fn::GetAtt:
+          - MySQLSecurityGroup
+          - GroupId
+
 Outputs:
   VPC:
     Description: A reference to the created VPC
