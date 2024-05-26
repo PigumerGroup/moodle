@@ -24,9 +24,19 @@ Parameters:
   InstanceType:
     Description: An instance Type
     Type: String
-    Default: t4g.small
+    Default: t4g.micro
 
 Resources:
+  S3VPCEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      RouteTableIds:
+        - Fn::ImportValue: !Sub ${EnvironmentName}-PrivateRouteTable
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
+      VpcEndpointType: Gateway
+      VpcId:
+        Fn::ImportValue: !Sub ${EnvironmentName}-VPC
+
   LoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:

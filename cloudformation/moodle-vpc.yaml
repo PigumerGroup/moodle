@@ -167,6 +167,15 @@ Resources:
           - LBSecurityGroup
           - GroupId
 
+  ElastiCacheSubnetGroup:
+    Type: AWS::ElastiCache::SubnetGroup
+    Properties:
+      CacheSubnetGroupName: !Sub ElastiCacheSubnetGroup-${EnvironmentName}
+      Description: ElastiCache Subnet Group
+      SubnetIds:
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+
   PrivateEC2SecurityGroupIngress:
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
@@ -179,7 +188,7 @@ Resources:
           - GroupId
       GroupId:
         Fn::GetAtt:
-          - EC2SecurityGroup
+          - PrivateEC2SecurityGroup
           - GroupId
 
   MySQLSecurityGroup:
