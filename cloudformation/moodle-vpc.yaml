@@ -132,45 +132,27 @@ Resources:
       RouteTableId: !Ref PrivateRouteTable
       SubnetId: !Ref PrivateSubnet2
 
-  S3VPCEndpoint:
-    Type: AWS::EC2::VPCEndpoint
-    Properties:
-      RouteTableIds:
-        - !Ref PrivateRouteTable
-      ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
-      VpcEndpointType: Gateway
-      VpcId: !Ref VPC
-
   MySQLSubnetGroup:
     Type: AWS::RDS::DBSubnetGroup
     Properties:
       DBSubnetGroupDescription: MySQL DBSubnet Group
-      DBSubnetGroupName: MySQLSubnet
+      DBSubnetGroupName: !Sub MySQLSubnet-${EnvironmentName}
       SubnetIds:
         - !Ref PrivateSubnet1
         - !Ref PrivateSubnet2
 
-  ElastiCacheSubnetGroup:
-    Type: AWS::ElastiCache::SubnetGroup
+  PrivateEC2SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
     Properties:
-      CacheSubnetGroupName: ElastiCacheSubnetGroup
-      Description: ElastiCache Subnet Group
-      SubnetIds:
-        - !Ref PrivateSubnet1
-        - !Ref PrivateSubnet2
-
+      GroupDescription: EC2 Security Group
+      GroupName: !Sub PrivateEC2SecurityGroup-${EnvironmentName}
+      VpcId: !Ref VPC
+  
   LBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Load Balancer Security Group
       GroupName: !Sub ${EnvironmentName}-LB-SecurityGroup
-      VpcId: !Ref VPC
-  
-  EC2SecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: EC2 Security Group
-      GroupName: !Sub ${EnvironmentName}-EC2-SecurityGroup
       VpcId: !Ref VPC
   
   LBSecurityGroupIngress:
@@ -185,7 +167,7 @@ Resources:
           - LBSecurityGroup
           - GroupId
 
-  EC2SecurityGroupIngress:
+  PrivateEC2SecurityGroupIngress:
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
       IpProtocol: tcp
@@ -204,7 +186,7 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: MySQL Security Group
-      GroupName: !Sub ${EnvironmentName}-MySQL-SecurityGroup
+      GroupName: !Sub MySQL-SecurityGroup-${EnvironmentName}
       VpcId: !Ref VPC
 
   MySQLSecurityGroupIngress:
@@ -262,9 +244,9 @@ Outputs:
     Export:
       Name: !Sub ${EnvironmentName}-LBSecurityGroup
   
-  EC2SecurityGroup:
+  PrivateEC2SecurityGroup:
     Description: A reference to the ec2 security group
-    Value: !Ref EC2SecurityGroup
+    Value: !Ref PrivateEC2SecurityGroup
     Export:
       Name: !Sub ${EnvironmentName}-EC2SecurityGroup
 
