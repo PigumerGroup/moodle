@@ -32,3 +32,4 @@ crontab -u www-data -e
 ## 参考
 
 - [G Suite アカウントでログインできる Moodle 3.5.9+ を業務効率化のために導入した話](https://qiita.com/k-kana/items/0269d1f831483c39f3e7)
+- [IAM 認証を使用してマウントする](https://docs.aws.amazon.com/ja_jp/efs/latest/ug/mounting-IAM-option.html)
