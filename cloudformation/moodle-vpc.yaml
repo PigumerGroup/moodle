@@ -253,6 +253,12 @@ Outputs:
     Export:
       Name: !Sub ${EnvironmentName}-LBSecurityGroup
   
+  ElastiCacheSubnetGroup:
+    Description: ElastiCache Subnet Group
+    Value: !Ref ElastiCacheSubnetGroup
+    Export:
+      Name: !Sub ${EnvironmentName}-ElastiCacheSubnetGroup
+
   PrivateEC2SecurityGroup:
     Description: A reference to the ec2 security group
     Value: !Ref PrivateEC2SecurityGroup
