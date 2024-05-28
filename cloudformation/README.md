@@ -1,3 +1,7 @@
+Moodle
+===
+
+## EFS
 
 ```text
 $ sudo apt-get update
@@ -9,8 +13,15 @@ $ sudo apt-get -y install ./build/amazon-efs-utils*deb
 ```
 
 ```text
-sudo mount -t efs -o iam,tls fs-xxx /mnt
+sudo mount -t efs -o iam,tls file-system-id /mnt
 ```
+
+/etc/fstab
+```text
+file-system-id:/ efs-mount-point efs _netdev,tls,iam 0 0
+```
+
+## moodledata
 
 ```text
 sudo mkdir -p /mnt/moodledata
@@ -20,6 +31,8 @@ sudo mkdir -p /mnt/moodledata
 chown -R www-data:www-data /var/www/html/moodle
 chown -R www-data:www-data /mnt/moodledata
 ```
+
+## crontab
 
 ```text
 crontab -u www-data -e
