@@ -26,6 +26,11 @@ Parameters:
     Type: String
     Default: t4g.micro
 
+  Capacity:
+    Description: Desire capacity
+    Type: Number
+    Default: 0
+
 Resources:
   S3VPCEndpoint:
     Type: AWS::EC2::VPCEndpoint
@@ -115,7 +120,7 @@ Resources:
   AutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
-      DesiredCapacity: 0
+      DesiredCapacity: !Ref Capacity
       LaunchConfigurationName: !Ref LaunchConfiguration
       MinSize: 0
       MaxSize: 2
