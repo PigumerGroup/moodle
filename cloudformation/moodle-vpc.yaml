@@ -265,6 +265,12 @@ Outputs:
     Export:
       Name: !Sub ${EnvironmentName}-EC2SecurityGroup
 
+  MySQLSecurityGroup:
+    Description: A reference to the mysql db security group
+    Value: !Ref MySQLSecurityGroup
+    Export:
+      Name: !Sub ${EnvironmentName}-MySQLSecurityGroup
+
   MySQLSubnetGroup:
     Description: A reference to the mysql db subnet group.
     Value: !Ref MySQLSubnetGroup

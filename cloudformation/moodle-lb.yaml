@@ -103,11 +103,19 @@ Resources:
       InstanceType: !Ref InstanceType
       SecurityGroups:
         - Fn::ImportValue: !Sub ${EnvironmentName}-EC2SecurityGroup
+      UserData:
+        Fn::Base64:
+          Fn::Join:
+          - ''
+          - - "#!/bin/bash -x\n"
+            - "mount -t efs "
+            - Fn::ImportValue: !Sub ${EnvironmentName}-FileSystemId
+            - " /mnt\n"
 
   AutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
-      DesiredCapacity: 1
+      DesiredCapacity: 0
       LaunchConfigurationName: !Ref LaunchConfiguration
       MinSize: 0
       MaxSize: 2
@@ -118,3 +126,8 @@ Resources:
       VPCZoneIdentifier:
         - Fn::ImportValue: !Sub ${EnvironmentName}-PrivateSubnet1
         - Fn::ImportValue: !Sub ${EnvironmentName}-PrivateSubnet2
+
+Outputs:
+  AutoScalingGroup:
+    Description: A autoscaling group
+    Value: !Ref AutoScalingGroup
