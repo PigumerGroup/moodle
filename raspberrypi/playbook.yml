@@ -12,31 +12,22 @@
     - name: install database
       ansible.builtin.apt:
         pkg:
-          - git
-          - binutils
-          - rustc
-          - cargo
-          - pkg-config
-          - libssl-dev
-          - mysql-client
+          - mariadb-server
+          - mariadb-client
           - php
-          - composer
-          - php-mysql 
-          - php-tokenizer
-          - php-xmlrpc
-          - php-soap
-          - php-zip
-          - php-gd
-          - php-simplexml
+          - php-mysql
           - php-xml
+          - php-xmlrpc
+          - php-gd
           - php-intl
           - php-mbstring
           - php-curl
+          - php-tokenizer
+          - php-soap
+          - php-zip
+          - composer
+          - git
     - name: moodle clone
       ansible.builtin.git:
         repo: git://git.moodle.org/moodle.git
         dest: /opt/moodle
-    - name: esf-utils clone
-      ansible.builtin.git:
-        repo: https://github.com/aws/efs-utils
-        dest: /opt/efs-utils
